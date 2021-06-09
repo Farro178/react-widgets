@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import Accordion from "./components/Accordion";
 import Search from "./components/Search";
+import Dropdown from "./components/Dropdown";
 
 const items = [
   {
@@ -17,11 +18,31 @@ const items = [
   },
 ];
 
+const options = [
+  {
+    label: "The colour red",
+    value: "Red",
+  },
+  {
+    label: "The colour green",
+    value: "Green",
+  },
+  {
+    label: "The colour blue",
+    value: "Blue",
+  },
+];
+
 // eslint-disable-next-line import/no-anonymous-default-export
 export default () => {
+  const [selected, setSelected] = useState(options[0]);
   return (
     <div>
-      <Search />
+      <Dropdown
+        selected={selected}
+        onSelectedChange={setSelected}
+        options={options}
+      />
     </div>
   );
 };
