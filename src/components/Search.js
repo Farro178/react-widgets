@@ -3,9 +3,18 @@ import axios from "axios";
 
 const Search = () => {
   const [term, setTerm] = useState("");
+  const [debouncedTerm, setDebouncedTerm] = useState(term);
   const [results, setResults] = useState([]);
 
-  console.log(results);
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      setDebouncedTerm(term);
+    }, 1000);
+
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [term]);
 
   useEffect(() => {
     const wikiSearch = async () => {
@@ -15,29 +24,17 @@ const Search = () => {
           list: "search",
           origin: "*",
           format: "json",
-          srsearch: term,
+          srsearch: debouncedTerm,
         },
       });
 
       setResults(data.query.search);
     };
 
-    if (term && !results.length) {
+    if (debouncedTerm) {
       wikiSearch();
-    } else {
-      // A timeout for the search, so api calls aren't instantaneous and it waits for user input
-      const timeoutId = setTimeout(() => {
-        // if term has a value, it will search
-        if (term) {
-          wikiSearch();
-        }
-      }, 500);
-
-      return () => {
-        clearTimeout(timeoutId);
-      };
     }
-  }, [term]);
+  }, [debouncedTerm]);
 
   /*
     I needed to turn a string into jsx to get this result correctly which is reasoning for inner html.
@@ -47,6 +44,7 @@ const Search = () => {
     Ultimately, don't do this if you don't trust the source for the api call ie wikipedia.
     As this is a practice application, I am leaving it here.
   */
+
   const renderedResults = results.map((result) => {
     return (
       <div key={result.pageid} className="item">
