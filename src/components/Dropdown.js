@@ -1,18 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 const Dropdown = ({ options, selected, onSelectedChange }) => {
   const [open, setOpen] = useState(false);
+  const ref = useRef();
 
   // as we only want this to run one time (during first render) we leave the array empty
   useEffect(() => {
-    document.body.addEventListener(
-      "click",
-      () => {
-        console.log("body click");
-        setOpen(false);
-      },
-      { capture: true }
-    );
+    const onBodyClick = (event) => {
+      if (ref.current.contains(event.target)) {
+        return;
+      }
+      setOpen(false);
+    };
+    document.body.addEventListener("click", onBodyClick, { capture: true });
+
+    return () => {
+      document.body.removeEventListener("click", onBodyClick, {
+        capture: true,
+      });
+    };
   }, []);
 
   const renderedOptions = options.map((option) => {
@@ -24,7 +30,6 @@ const Dropdown = ({ options, selected, onSelectedChange }) => {
         key={option.value}
         className="item"
         onClick={() => {
-          console.log("clicked item");
           onSelectedChange(option);
         }}
       >
@@ -34,12 +39,11 @@ const Dropdown = ({ options, selected, onSelectedChange }) => {
   });
 
   return (
-    <div className="ui form">
+    <div ref={ref} className="ui form">
       <div className="field">
         <label className="label">Select a Colour</label>
         <div
           onClick={() => {
-            console.log("dropdown clicked");
             setOpen(!open);
           }}
           className={`ui selection dropdown ${open ? "visible active" : ""}`}
